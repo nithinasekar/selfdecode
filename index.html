@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SELFDECODE | AI Psychometric Mapping</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+
+body{
+margin:0;
+font-family: 'Segoe UI', sans-serif;
+background: linear-gradient(135deg,#fbc2eb,#a6c1ee);
+color:#333;
+text-align:center;
+}
+
+.section{
+padding:60px 20px;
+}
+
+.card{
+background:#ffffffcc;
+backdrop-filter: blur(10px);
+max-width:850px;
+margin:auto;
+padding:40px;
+border-radius:25px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+h1{
+font-size:52px;
+letter-spacing:4px;
+color:#444;
+}
+
+button{
+padding:12px 28px;
+margin:10px;
+border:none;
+border-radius:30px;
+background:#cdb4db;
+color:#333;
+font-size:16px;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+background:#bde0fe;
+}
+
+.developed{
+margin-top:30px;
+font-weight:bold;
+letter-spacing:2px;
+}
+
+canvas{
+margin-top:30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- LANDING PAGE -->
+
+<div class="section" id="landing">
+<h1>SELFDECODE</h1>
+
+<div class="card">
+<p>
+SELFDECODE is an AI-inspired adaptive psychometric analysis system
+designed to map emotional intelligence, cognitive reasoning,
+behavioral traits, and personal growth potential using
+dynamic scoring algorithms.
+</p>
+
+<div class="developed">
+DEVELOPED BY<br><br>
+NITHINA A SEKAR<br>
+TALLURI DIVYASREE
+</div>
+
+<br><br>
+<button onclick="startTest()">Begin Personality Analysis</button>
+</div>
+</div>
+
+<!-- QUIZ -->
+
+<div class="section" id="quiz" style="display:none;">
+<div class="card">
+<h2 id="question"></h2>
+<div id="options"></div>
+</div>
+</div>
+
+<!-- RESULT -->
+
+<div class="section" id="result" style="display:none;">
+<div class="card">
+<h2>Your Advanced Psychological Profile</h2>
+<canvas id="chart" height="150"></canvas>
+<div id="report"></div>
+</div>
+</div>
+
+<script>
+
+let traits={
+Confidence:0,
+Leadership:0,
+Emotional_Stability:0,
+Empathy:0,
+Creativity:0,
+Logic:0,
+Discipline:0,
+Risk_Taking:0,
+Social_Energy:0,
+Self_Awareness:0
+};
+
+let current=0;
+
+const questions=[
+
+{
+q:"When someone disagrees with you publicly:",
+a:[
+{text:"Respond calmly with logic",effect:{Logic:2,Emotional_Stability:1}},
+{text:"Feel personally affected",effect:{Empathy:1,Emotional_Stability:-1}},
+{text:"Assert dominance confidently",effect:{Confidence:2,Leadership:1}},
+{text:"Avoid confrontation",effect:{Confidence:-1}}
+]
+},
+
+{
+q:"How do you handle failure?",
+a:[
+{text:"Reflect and improve",effect:{Self_Awareness:2,Discipline:1}},
+{text:"Take risks again immediately",effect:{Risk_Taking:2}},
+{text:"Discuss feelings with friends",effect:{Empathy:1,Social_Energy:1}},
+{text:"Overthink repeatedly",effect:{Emotional_Stability:-1}}
+]
+},
+
+{
+q:"You are most productive when:",
+a:[
+{text:"Following a strict schedule",effect:{Discipline:2}},
+{text:"Brainstorming new ideas",effect:{Creativity:2}},
+{text:"Leading a team",effect:{Leadership:2}},
+{text:"Working alone deeply focused",effect:{Logic:1}}
+]
+},
+
+{
+q:"In stressful situations:",
+a:[
+{text:"Stay composed",effect:{Emotional_Stability:2}},
+{text:"Seek emotional support",effect:{Empathy:1}},
+{text:"Take quick bold action",effect:{Confidence:1,Risk_Taking:1}},
+{text:"Plan structured solution",effect:{Discipline:1}}
+]
+},
+
+{
+q:"Your decision-making style is:",
+a:[
+{text:"Data-driven",effect:{Logic:2}},
+{text:"Intuitive",effect:{Creativity:1,Risk_Taking:1}},
+{text:"Emotion-sensitive",effect:{Empathy:2}},
+{text:"Strategic long-term",effect:{Leadership:1,Discipline:1}}
+]
+}
+
+];
+
+function startTest(){
+document.getElementById("landing").style.display="none";
+document.getElementById("quiz").style.display="block";
+showQuestion();
+}
+
+function showQuestion(){
+if(current>=questions.length){
+generateReport();
+return;
+}
+
+let q=questions[current];
+document.getElementById("question").innerText=q.q;
+
+let html="";
+q.a.forEach((option,i)=>{
+html+=`<button onclick="selectOption(${i})">${option.text}</button>`;
+});
+document.getElementById("options").innerHTML=html;
+}
+
+function selectOption(i){
+let effects=questions[current].a[i].effect;
+for(let key in effects){
+traits[key]+=effects[key];
+}
+current++;
+showQuestion();
+}
+
+function generateReport(){
+document.getElementById("quiz").style.display="none";
+document.getElementById("result").style.display="block";
+
+let labels=Object.keys(traits);
+let values=Object.values(traits);
+
+let colors=values.map(v=>{
+if(v>=3) return "#a2d2ff";      // strong pastel blue
+if(v>=1) return "#ffc8dd";      // moderate pastel pink
+return "#ffafcc";               // needs improvement pastel red
+});
+
+new Chart(document.getElementById("chart"),{
+type:'bar',
+data:{
+labels:labels,
+datasets:[{
+data:values,
+backgroundColor:colors,
+barThickness:15
+}]
+},
+options:{
+plugins:{legend:{display:false}},
+scales:{y:{beginAtZero:true}}
+}
+});
+
+let reportHTML="<h3>Trait Interpretation</h3>";
+
+labels.forEach((trait,i)=>{
+reportHTML+=`<p><b>${trait}</b> — Score ${values[i]} :
+${values[i]>=3?"Strongly developed dimension.":
+values[i]>=1?"Emerging potential area.":
+"Needs structured improvement plan."}
+</p>`;
+});
+
+reportHTML+=`
+<h3>AI-Based Growth Strategy</h3>
+<p>
+This adaptive system maps your emotional, cognitive and behavioral
+patterns. Focus on structured habit development, resilience training,
+emotional regulation practices, and strategic self-reflection to
+evolve your psychological strengths.
+</p>
+
+<p><b>Conclusion:</b> Self-awareness creates transformation. 
+You now understand your behavioral architecture and growth path.</p>
+`;
+
+document.getElementById("report").innerHTML=reportHTML;
+}
+
+</script>
+
+</body>
+</html>
